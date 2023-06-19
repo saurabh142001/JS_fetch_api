@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Data</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid black;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Age</th>
+        <th>Image</th>
+        <th>Password</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Edit User</h2>
+      <form id="editForm">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName"><br><br>
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName"><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br><br>
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age"><br><br>
+        <button type="button" id="updateButton">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Function to open the modal and populate the form with user data
+    function openModal(user) {
+      const modal = document.getElementById('myModal');
+      const firstNameInput = document.getElementById('firstName');
+      const lastNameInput = document.getElementById('lastName');
+      const emailInput = document.getElementById('email');
+      const ageInput = document.getElementById('age');
+
+      // Set the form values with the user data
+      firstNameInput.value = user.name.first;
+      lastNameInput.value = user.name.last;
+      emailInput.value = user.email;
+      ageInput.value = user.dob.age;
+
+      // Show the modal
+      modal.style.display = 'block';
+    }
+
+    // Function to close the modal
+    function closeModal() {
+      const modal = document.getElementById('myModal');
+      modal.style.display = 'none';
+    }
+
+    // Function to delete a user's data
+    function deleteUser(user) {
+      // Remove the row from the table
+      const row = user.parentElement.parentElement;
+      row.remove();
+    }
+
+    fetch('https://randomuser.me/api/?results=4')
+      .then(response => response.json())
+      .then(data => {
+        const tableBody = document.querySelector('#userTable tbody');
+
+        data.results.forEach(user => {
+          const row = document.createElement('tr');
+          const firstNameCell = document.createElement('td');
+          const lastNameCell = document.createElement('td');
+          const emailCell = document.createElement('td');
+          const ageCell = document.createElement('td');
+          const imageCell = document.createElement('td');
+          const passwordCell = document.createElement('td');
+          const editCell = document.createElement('td');
+          const deleteCell = document.createElement('td');
+
+          firstNameCell.textContent = user.name.first;
+          lastNameCell.textContent = user.name.last;
+          emailCell.textContent = user.email;
+          ageCell.textContent = user.dob.age;
+
+          const image = document.createElement('img');
+          image.src = user.picture.medium;
+          image.alt = "Profile Image";
+          imageCell.appendChild(image);
+
+          passwordCell.textContent = user.login.password;
+
+          const editButton = document.createElement('button');
+          editButton.textContent = 'Edit';
+          editButton.addEventListener('click', function() {
+            openModal(user);
+          });
+          editCell.appendChild(editButton);
+
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', function() {
+            deleteUser(deleteButton);
+          });
+          deleteCell.appendChild(deleteButton);
+
+          row.appendChild(firstNameCell);
+          row.appendChild(lastNameCell);
+          row.appendChild(emailCell);
+          row.appendChild(ageCell);
+          row.appendChild(imageCell);
+          row.appendChild(passwordCell);
+          row.appendChild(editCell);
+          row.appendChild(deleteCell);
+
+          tableBody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.log('An error occurred:', error);
+      });
+
+    // Event listener to close the modal when the close button is clicked
+    const closeButton = document.querySelector('.close');
+    closeButton.addEventListener('click', closeModal);
+  </script>
+</body>
+</html>
